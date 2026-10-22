@@ -1,0 +1,22 @@
+# spec-kit GitLab extension settings.
+#
+# Machine-specific overrides go in gitlab-sync-config.local.yml next to this file.
+# Environment variables win over both: GITLAB_URL, GITLAB_PROJECT, GITLAB_CA_FILE.
+# The API token is never stored here: set GITLAB_TOKEN (or log in with `glab auth login`).
+
+gitlab:
+  url: ""        # e.g. https://gitlab.example.com
+  project: ""    # e.g. group/project or group/subgroup/project
+  ca_file: ""    # optional PEM bundle for a self-signed or internal certificate
+
+labels:
+  speckit_label: "spec-kit"    # added to every issue the extension creates
+  feature_label: "feature"
+  story_label: "user-story"
+  task_label: "task"
+
+mapping:
+  feature_to_issue: true        # create a parent issue for the feature
+  feature_to_milestone: true    # create a milestone per feature and assign its issues to it
+  priority_to_label: true       # story priority P1 -> label priority::1 (tasks inherit their story's)
+  link_tasks_to_stories: true   # link each task issue to its user story issue

@@ -1,0 +1,8 @@
+# Development files that should not be copied into spec-kit projects
+tests/
+.github/
+.gitignore
+__pycache__/
+*.pyc
+.git/
+.ruff_cache/

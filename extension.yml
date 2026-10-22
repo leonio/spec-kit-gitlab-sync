@@ -1,0 +1,60 @@
+schema_version: "1.0"
+
+extension:
+  id: "gitlab-sync"
+  name: "GitLab Sync"
+  version: "1.0.0"
+  description: "Sync spec-kit features, user stories and tasks with GitLab issues, including self-hosted"
+  author: "leonio"
+  repository: "https://github.com/leonio/speckit-gitlab-sync"
+  homepage: "https://github.com/leonio/speckit-gitlab-sync"
+  license: "MIT"
+
+requires:
+  # Commands declare only a Python (`py`) script variant. 0.13.2 is the first
+  # spec-kit release that falls back to it in sh/ps projects; earlier releases
+  # leave {SCRIPT} unreplaced (checked against 0.12.17-0.13.1 and 0.13.2-1.2.3).
+  speckit_version: ">=0.13.2"
+
+provides:
+  commands:
+    - name: "speckit.gitlab-sync.init"
+      file: "commands/init.md"
+      description: "Connect the project to GitLab and check the token and project access"
+
+    - name: "speckit.gitlab-sync.sync"
+      file: "commands/sync.md"
+      description: "Create and link feature, story and task issues, and sync done/open state both ways"
+
+    - name: "speckit.gitlab-sync.status"
+      file: "commands/status.md"
+      description: "Compare the feature's tasks and stories with their GitLab issues (read-only)"
+
+    - name: "speckit.gitlab-sync.import-feature"
+      file: "commands/import-feature.md"
+      description: "Use an existing GitLab issue as the feature issue, or start a feature from it"
+
+  config:
+    - name: "gitlab-sync-config.yml"
+      template: "gitlab-sync-config.template.yml"
+      description: "GitLab URL, project, labels and sync options"
+      required: true
+
+hooks:
+  after_tasks:
+    command: "speckit.gitlab-sync.sync"
+    optional: true
+    prompt: "Create GitLab issues for this feature's stories and tasks?"
+    description: "Create GitLab issues once tasks.md exists"
+  after_implement:
+    command: "speckit.gitlab-sync.sync"
+    optional: true
+    prompt: "Sync completed tasks to GitLab?"
+    description: "Close the GitLab issues of tasks completed during implementation"
+
+tags:
+  - "gitlab"
+  - "issues"
+  - "sync"
+  - "self-hosted"
+  - "project-management"

@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.13"]
+        include:
+          - os: ubuntu-latest
+            python: "3.9"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests -v
+
+  register:
+    name: Register with the latest spec-kit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv tool install specify-cli
+      - name: Install the extension into a fresh project and check the rendered commands
+        run: |
+          mkdir "$RUNNER_TEMP/project" && cd "$RUNNER_TEMP/project" && git init -q
+          # The runner has no claude CLI; only the rendered command files are checked.
+          specify init --here --force --non-interactive --integration claude --script sh --ignore-agent-tools
+          specify extension add --dev "$GITHUB_WORKSPACE"
+          grep -q 'gitlab-sync/scripts/python/gitlab.py sync' .claude/skills/speckit-gitlab-sync-sync/SKILL.md
+          grep -q '/speckit-gitlab-sync-init' .claude/skills/speckit-gitlab-sync-status/SKILL.md
+          if grep -rn -e '{SCRIPT' -e '__SPECKIT_COMMAND' .claude/skills/speckit-gitlab-sync-*; then exit 1; fi
+          test ! -e .specify/extensions/gitlab-sync/tests
